@@ -16,8 +16,10 @@ import mods.immibis.redlogic.CommandDebug;
 import mods.immibis.redlogic.InvalidTile;
 import mods.immibis.redlogic.RedLogicMod;
 import mods.immibis.redlogic.Utils;
+import mods.immibis.redlogic.api.wiring.IBundledWire;
 import mods.immibis.redlogic.api.wiring.IConnectable;
 import mods.immibis.redlogic.api.wiring.IWire;
+import mods.immibis.redlogic.cc.CCIntegration;
 import mods.immibis.redlogic.rendering.WireRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.particle.EffectRenderer;
@@ -360,6 +362,10 @@ public abstract class WireTile extends TileCoverableBase implements IConnectable
 			TileEntity te = worldObj.getTileEntity(x, y, z);
 			if(te instanceof IConnectable)
 				return ((IConnectable)te).connects(this, wireSide, direction ^ 1);
+			else if(CCIntegration.active() && CCIntegration.isCCTile(te) && this instanceof IBundledWire) {
+				//Sorry for this hack.
+				return true;
+			}
 			return connects(x, y, z, wireSide, direction ^ 1);
 		}
 		
@@ -388,6 +394,10 @@ public abstract class WireTile extends TileCoverableBase implements IConnectable
 			TileEntity te = worldObj.getTileEntity(x, y, z);
 			if(te instanceof IConnectable)
 				return ((IConnectable)te).connects(this, -1, direction ^ 1);
+			else if(CCIntegration.active() && CCIntegration.isCCTile(te) && this instanceof IBundledWire) {
+				//Sorry for this hack.
+				return true;
+			}
 			return connects(x, y, z, -1, direction ^ 1);
 		}
 		

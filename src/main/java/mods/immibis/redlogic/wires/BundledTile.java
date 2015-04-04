@@ -13,6 +13,7 @@ import mods.immibis.redlogic.api.wiring.IBundledPropagator;
 import mods.immibis.redlogic.api.wiring.IBundledUpdatable;
 import mods.immibis.redlogic.api.wiring.IBundledWire;
 import mods.immibis.redlogic.api.wiring.IWireUpdateOperation;
+import mods.immibis.redlogic.cc.CCIntegration;
 
 public class BundledTile extends WireTile implements IBundledEmitter, IBundledUpdatable, IBundledWire, IBundledPropagator {
 	
@@ -59,11 +60,16 @@ public class BundledTile extends WireTile implements IBundledEmitter, IBundledUp
 			if((strength[colour] & 0xFF) < o_strength)
 				strength[colour] = (byte)o_strength;
 			
-		} else if(te instanceof IBundledEmitter) {
-			byte[] o_strength = ((IBundledEmitter)te).getBundledCableStrength(side, dir);
+		} else {
+			byte[] o_strength = null;
+			if(te instanceof IBundledEmitter) {
+				o_strength = ((IBundledEmitter) te).getBundledCableStrength(side, dir);
+			} else if(CCIntegration.active() && CCIntegration.isCCTile(te)){
+				o_strength = CCIntegration.getBundledOutput(te, dir);
+			}
 			if(o_strength != null) {
 				// null = all 0
-				
+
 				for(int k = 0; k < 16; k++) {
 					if((mask & (1 << k)) == 0)
 						continue;
@@ -166,18 +172,22 @@ public class BundledTile extends WireTile implements IBundledEmitter, IBundledUp
 				
 				decreased_mask &= updatingColours;
 				different_mask &= updatingColours;
-				
+
 				if(decreased_mask != 0) {
-					
+					// This is needed because otherwise only colours the values of which have been decreased
+					// Would be added to different_mask again, not those which increased as oldStrength
+					// is being updated in updateStrengthFromSurroundingBlocks.
+					byte[] currentOldStrength = oldStrength.clone();
+
 					updateConnectedThings(decreased_mask, updateOperation);
 					updateStrengthFromSurroundingBlocks(updatingColours);
 					
 					different_mask = decreased_mask;
 					for(int k = 0; k < 16; k++)
-						if(strength[k] != oldStrength[k])
+						if(strength[k] != currentOldStrength[k])
 							different_mask |= 1 << k;
 				}
-				
+
 				if(different_mask != 0)
 					updateConnectedThings(different_mask, updateOperation);
 				
@@ -225,6 +235,8 @@ public class BundledTile extends WireTile implements IBundledEmitter, IBundledUp
 						((IBundledPropagator)t).propagateBundledSignal(colourMask, updateOperation);
 					else if(t instanceof IBundledUpdatable)
 						updateOperation.queueBundledUpdate(t);
+					else if(CCIntegration.active() && CCIntegration.isCCTile(t))
+						updateOperation.queueBlockUpdate(x, y, z);
 				}
 			}
 			

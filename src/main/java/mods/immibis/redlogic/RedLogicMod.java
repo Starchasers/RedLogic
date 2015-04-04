@@ -13,6 +13,7 @@ import mods.immibis.redlogic.array.ArrayCellBlock;
 import mods.immibis.redlogic.array.ArrayCellItem;
 import mods.immibis.redlogic.array.ArrayCellTile;
 import mods.immibis.redlogic.array.BundledCrossoverTile;
+import mods.immibis.redlogic.cc.CCIntegration;
 import mods.immibis.redlogic.chips.builtin.RegisterScannables;
 import mods.immibis.redlogic.chips.generated.CCOFactory;
 import mods.immibis.redlogic.chips.ingame.*;
@@ -38,6 +39,7 @@ import net.minecraft.block.material.MaterialLogic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraftforge.oredict.OreDictionary;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -168,6 +170,8 @@ public class RedLogicMod extends ModBase {
 	@Override
 	protected void sharedInit() throws Exception {
 		SimpleWireUpdateOperation.init();
+		if(Loader.isModLoaded("ComputerCraft"))
+			CCIntegration.initialize();
 	}
 	
 	@Override
