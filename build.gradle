@@ -27,6 +27,9 @@ version = "${config.minecraft.version}-${config.redlogic.version}"
 group = "mods.immibis.redlogic" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "RedLogic"
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 if (JavaVersion.current().isJava8Compatible()) {
 	allprojects {
 		tasks.withType(Javadoc) {
@@ -102,19 +105,3 @@ makeJars.dependsOn clean, build, deobfJar, apiZip
 build.shouldRunAfter clean
 deobfJar.shouldRunAfter build
 apiZip.shouldRunAfter deobfJar
-
-apply plugin: 'maven-publish'
-
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact jar
-			artifact deobfJar
-		}
-	}
-	repositories {
-		maven {
-			url "${config.maven.url}"
-		}
-	}
-}
